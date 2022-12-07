@@ -1,0 +1,25 @@
+---
+# 创建相关目录
+- name: mkdir  dir
+  file: dest={{ item }} state=directory recurse=yes owner=app group=app mode=0766
+  with_items:
+    - '{{ data_path }}'
+    - '{{ data_path }}/redis_exporter'
+    - '{{ data_path }}/soft'
+    - '{{ data_path }}/shell'
+  tags: mkdir_dir
+#分发软件包到安装节点
+
+- name: cp  redis_exporter soft
+  copy: src={{ soft_tmp_path }}/{{ exporter_name }} dest={{ data_path }}/soft
+  tags: cp redis_exporter soft
+
+- name: cp script
+  template: src={{item}} dest={{ data_path }}/shell/ owner=app group=app mode=0644
+  with_items:
+    - redis_exporter_install.sh
+  tags: cp shell script
+- name: exec shell
+  shell: sh {{ data_path }}/shell/redis_exporter_install.sh
+
+  

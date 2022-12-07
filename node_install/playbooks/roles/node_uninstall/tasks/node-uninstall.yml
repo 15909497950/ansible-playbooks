@@ -1,0 +1,20 @@
+---
+
+# 停止服务
+- name: stop node_exporter
+  shell: systemctl stop node_exporter
+  ignore_errors: True   
+# 删除相关数据
+- name: delete data
+  file: dest={{ item }} state=absent
+  with_items:
+    # 安装目录
+    - '{{ data_path }}/prometheus'
+    # soft
+    - '{{ data_path }}/shell/install.sh'
+    - '{{ data_path }}/soft/{{ node_name }}'
+  tags: delete_data
+
+
+
+

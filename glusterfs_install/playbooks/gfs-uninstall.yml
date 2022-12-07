@@ -1,0 +1,12 @@
+---
+
+# gfs服务卸载
+- name: gfs uninstall
+  hosts: gfs_cluster
+  become: yes
+  become_method: sudo
+  remote_user: root
+  gather_facts: false
+  vars_files: roles/gfs_install/vars/main.yml
+  roles:
+    - gfs_uninstall

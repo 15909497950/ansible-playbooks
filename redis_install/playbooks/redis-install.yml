@@ -1,0 +1,11 @@
+---
+
+# 安装redis服务
+- name: redis install
+  hosts: redis_cluster
+  become: yes
+  become_method: sudo
+  remote_user: root
+  gather_facts: false
+  roles:
+    - redis_install

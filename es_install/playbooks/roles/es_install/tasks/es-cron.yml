@@ -1,0 +1,16 @@
+---
+
+- name: copy es shell scripts
+  template: src={{ item }} dest={{ es_data_path }}/shell/ owner={{ es_user }} group={{ es_user }} mode=0755
+  with_items:
+    - es_check.sh
+    - es_clean_log.sh
+  tags: es_crontab
+
+- name: configure es check shell cron
+  cron: name='es check' state=present user=root minute='*/5' hour='*' day='*' month='*' weekday='*' job='{{ es_data_path }}/shell/es_check.sh >/dev/null 2>&1'
+  tags: es_crontab
+
+- name: configure es clean log shell cron
+  cron: name='es cleanlog' state=present user=root minute='5' hour='1' day='*' month='*' weekday='*' job='{{ es_data_path }}/shell/es_clean_log.sh >/dev/null 2>&1'
+  tags: es_crontab

@@ -1,0 +1,5 @@
+[es_cluster]
+# es集群，第一列保持默认，node_name为自定义主机名
+es1 node_name=es-001 ansible_user=root ansible_port=22 ansible_host=172.16.4.77
+es2 node_name=es-002 ansible_user=root ansible_port=22 ansible_host=172.16.4.95
+es3 node_name=es-003 ansible_user=root ansible_port=22 ansible_host=172.16.4.46

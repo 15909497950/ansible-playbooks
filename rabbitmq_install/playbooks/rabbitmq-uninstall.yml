@@ -1,0 +1,12 @@
+---
+
+# 服务卸载
+- name: uninstall 
+  hosts: rabbitmq_cluster
+  become: yes
+  become_method: sudo
+  remote_user: root
+  gather_facts: false
+  vars_files: roles/rabbitmq_install/vars/main.yml
+  roles:
+    - rabbitmq_uninstall

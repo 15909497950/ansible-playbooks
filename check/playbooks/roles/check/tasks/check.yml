@@ -1,0 +1,22 @@
+---
+# 创建相关目录
+- name: mkdir  dir
+  file: dest={{ item }} state=directory recurse=yes
+  with_items:
+    - '{{ data_path }}/checkshell/'
+  tags: mkdir_dir
+#分发检查user脚本
+
+- name: cp script
+  template: src={{item}} dest={{ data_path }}/checkshell/ 
+  with_items:
+    - check.sh
+  tags: cp shell script
+
+- name: exec shell
+  shell: sh {{ data_path }}/checkshell/check.sh
+
+
+ 
+
+  

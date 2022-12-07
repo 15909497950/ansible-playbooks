@@ -1,0 +1,21 @@
+---
+
+
+
+# 停止gfs服务
+- name: stop gfs
+  shell: systemctl stop glusterd.service
+  ignore_errors: True
+# 删除gfs相关数据
+- name: delete gfs data
+  file: dest={{ item }} state=absent
+  with_items:
+    # gfs安装目录
+    - '/data/gfs_data'
+    - '{{ data_path }}'
+    - '{{ volume_path }}'
+  tags: delete_gfs_data
+
+
+
+

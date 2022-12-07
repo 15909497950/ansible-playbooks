@@ -1,0 +1,149 @@
+---
+# 创建相关目录
+- name: mkdir rabbitmq dir
+  file: dest={{ item }} state=directory recurse=yes owner=app group=app mode=0755
+  with_items:
+    - '{{ data_path }}'
+    - '{{ data_path }}/soft'
+    - '{{ data_path }}/shell'
+  tags: mkdir_dir
+#分发软件包到安装节点
+- name: cp rabbitmq soft
+  copy: src={{ soft_tmp_path }}/{{ mq_name }} dest={{ data_path }}/soft
+  tags: cp rabbitmq soft
+- name: cp otp soft
+  copy: src={{ soft_tmp_path }}/{{ otp_name }} dest={{ data_path }}/soft
+  tags: cp otp soft
+- name: cp jdk soft
+  copy: src={{ soft_tmp_path }}/{{ jdk_name }} dest={{ data_path }}/soft
+  tags: cp jdk soft  
+- name: cp script
+  template: src={{item}} dest={{ data_path }}/shell/ owner=app group=app mode=0744
+  with_items:
+    - mqinstall.sh
+    - mqstop.sh
+    - erlstop.sh
+  tags: cp shell script
+- name: exec shell
+  shell: sh {{ data_path }}/shell/mqinstall.sh
+
+#添加web管理插件
+- name: add web plugin
+  shell: source /etc/profile && rabbitmq-plugins enable rabbitmq_management
+  ignore_errors: True
+- name: set hostname
+  hostname: name={{ node_name }} use=systemd
+  tags: set_hostname
+- name: add hosts
+  lineinfile:
+    dest: /etc/hosts
+    regexp: '{{ hostvars[item].ansible_host }} '
+    line: '{{ hostvars[item].ansible_host }}    {{ hostvars[item].node_name }}'
+  with_items: "{{ groups['rabbitmq_cluster'] }}"
+  tags: add_hosts
+- name: set sysctl
+  sysctl:
+    name: vm.max_map_count
+    value: 655360
+    sysctl_set: yes
+    reload: yes
+#后台启动
+- name: start mq            
+  shell: su - app -c "source /etc/profile && {{ data_path }}/sbin/rabbitmq-server -detached"
+
+
+- name: fetch cookie
+  fetch: src=/home/app/.erlang.cookie dest=/tmp/ flat=yes
+  when: inventory_hostname == 'master'  
+
+
+
+- name: cp delayed_message plugin
+  copy: src={{ soft_tmp_path }}/{{ plugin_name }} dest={{ data_path }}/plugins  owner=app group=app mode=0644
+
+ 
+- name: cp cookie
+  copy: src=/tmp/.erlang.cookie dest=/home/app/.erlang.cookie owner=app group=app mode=0600
+- name: kill rabbitmq 
+  shell: sh {{ data_path }}/shell/mqstop.sh
+  when: inventory_hostname == 'slave2'
+  ignore_errors: True
+- name: kill rabbitmq
+  shell: sh {{ data_path }}/shell/mqstop.sh
+  when: inventory_hostname == 'slave1'
+  ignore_errors: True
+- name: start mq            
+  shell: su - app -c "{{ data_path }}/sbin/rabbitmq-server -detached"
+  when: inventory_hostname == 'slave1'
+- name: start mq            
+  shell: su - app -c "{{ data_path }}/sbin/rabbitmq-server -detached"
+  when: inventory_hostname == 'slave2'
+#停止应用程序
+- name: stop app
+  shell: su - app -c "rabbitmqctl stop_app"
+  when: inventory_hostname == 'slave2'
+  ignore_errors: True
+- name: stop app
+  shell: su - app -c "rabbitmqctl stop_app"
+  when: inventory_hostname == 'slave1'
+  ignore_errors: True
+#加入集群
+- name: join cluster
+  shell: su - app -c "rabbitmqctl join_cluster rabbit@master"
+  when: inventory_hostname == 'slave2'
+- name: join cluster
+  shell: su - app -c "rabbitmqctl join_cluster rabbit@master"
+  when: inventory_hostname == 'slave1'
+ #启动应用程序
+- name: start app
+  shell: su - app -c "rabbitmqctl start_app"
+  when: inventory_hostname == 'slave2'
+  ignore_errors: True
+- name: start app
+  shell: su - app -c "rabbitmqctl start_app"
+  when: inventory_hostname == 'slave1'
+  ignore_errors: True
+#添加延迟插件
+- name: add delayed_message plugin
+  shell: source /etc/profile && rabbitmq-plugins enable rabbitmq_delayed_message_exchange
+  ignore_errors: True
+ #增加用户并设置权限
+- name: add user password          
+  shell: su - app -c "rabbitmqctl add_user admin '{{ passwd }}'"
+  ignore_errors: True
+- name: add admin user            
+  shell: su - app -c "rabbitmqctl set_user_tags admin administrator"
+  ignore_errors: True
+#添加兔展用户
+- name: add tzuser password          
+  shell: su - app -c "rabbitmqctl add_user {{ tzuser }} '{{ tzpasswd }}'"
+  ignore_errors: True
+- name: add tzuser admin            
+  shell: su - app -c "rabbitmqctl set_user_tags {{ tzuser }} administrator"
+  ignore_errors: True
+#授予vhost
+- name: add vhost
+  shell: su - app -c "rabbitmqctl add_vhost /rabbitpre"
+  ignore_errors: True
+- name: set_permissions vhost            
+  shell: su - app -c "rabbitmqctl set_permissions -p /rabbitpre  {{ tzuser }} '.*' '.*' '.*'"
+  ignore_errors: True
+#添加琢学用户
+- name: add zxuser password          
+  shell: su - app -c "rabbitmqctl add_user {{ zxuser }} '{{ zxpasswd }}'"
+  ignore_errors: True
+- name: add zxuser admin            
+  shell: su - app -c "rabbitmqctl set_user_tags {{ zxuser }} administrator"
+  ignore_errors: True
+#授予vhost
+- name: add vhost
+  shell: su - app -c "rabbitmqctl add_vhost /cosp"
+  ignore_errors: True
+- name: set_permissions vhost            
+  shell: su - app -c "rabbitmqctl set_permissions -p /cosp  {{ zxuser }} '.*' '.*' '.*'"
+  ignore_errors: True
+#设置镜像队列策略
+- name: set_policy            
+  shell: su - app -c "rabbitmqctl set_policy ha-all "^" '{"ha-mode":"all"}'"
+  ignore_errors: True
+  when: inventory_hostname == 'master'

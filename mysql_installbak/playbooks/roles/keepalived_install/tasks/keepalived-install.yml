@@ -1,0 +1,45 @@
+---
+# 创建相关目录
+- name: mkdir  dir
+  file: dest={{ item }} state=directory recurse=yes owner=app group=app mode=0644
+  with_items:
+    - '{{ data_path }}'
+    - '{{ data_path }}/soft'
+    - '{{ data_path }}/shell'
+  tags: mkdir_dir
+#分发软件包到安装节点
+
+- name: cp  keepalived_name soft
+  copy: src={{ soft_tmp_path }}/{{ keepalived_name }} dest={{ data_path }}/soft
+  tags: cp keepalived_name soft
+
+- name: cp script
+  template: src={{item}} dest={{ data_path }}/shell/ owner=app group=app mode=0644
+  with_items:
+    - kpinstall.sh
+  tags: cp shell script
+- name: exec shell
+  shell: sh {{ data_path }}/shell/kpinstall.sh
+
+- name: cp keepalived.conf
+  template: src={{item}} dest=/etc/keepalived owner=app group=app mode=0644
+  with_items:
+    - keepalived.conf
+    - check_mysql.sh
+    - notify_action.sh
+  tags: cp keepalived.conf
+- name: chmod +x
+  command: chmod +x /etc/keepalived/check_mysql.sh
+- name: chmod +x notify_action.sh
+  command: chmod +x /etc/keepalived/notify_action.sh
+- name: update keepalived.conf
+  command: sed -i 's/{{ hostvars['slave']['ansible_host'] }}/{{ hostvars['master']['ansible_host'] }}/g' /etc/keepalived/keepalived.conf
+  when: inventory_hostname == 'slave' 
+
+- name: update keepalived.conf
+  command: sed -i 's/unicast_src_ip {{ hostvars['master']['ansible_host'] }}/unicast_src_ip {{ hostvars['slave']['ansible_host'] }}/g' /etc/keepalived/keepalived.conf
+  when: inventory_hostname == 'slave'
+- name: start keepalived
+  command: systemctl start keepalived.service
+- name: enable keepalived
+  command: systemctl enable keepalived.service

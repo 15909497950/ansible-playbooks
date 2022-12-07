@@ -1,0 +1,10 @@
+[gfs_cluster]
+
+gfs01  ansible_user=root ansible_port=22 ansible_host=172.16.4.77
+gfs02  ansible_user=root ansible_port=22 ansible_host=172.16.4.95
+gfs03  ansible_user=root ansible_port=22 ansible_host=172.16.4.46
+gfs04  ansible_user=root ansible_port=22 ansible_host=172.16.4.235 ansible_ssh_pass='CZDcXJ&KOWYVd3@#9!3r'
+#容器集群node节点
+[tke-node]
+node01 ansible_user=root ansible_port=22 ansible_host=172.16.4.46
+node02 ansible_user=root ansible_port=22 ansible_host=172.16.4.95

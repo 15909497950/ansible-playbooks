@@ -1,0 +1,21 @@
+[Unit]
+Description=Apache Kafka server (broker)
+After=network.target zookeeper.service
+
+[Service]
+Type=forking
+User=app
+Group=app
+Environment=PATH={{ data_path }}/jdk1.8.0_202/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/usr/local/jdk/bin:/usr/local/jdk/bin:/usr/local/jdk/bin:/root/bin
+ExecStart={{ data_path }}/kafka/bin/kafka-server-start.sh -daemon {{ data_path }}/kafka/config/server.properties
+ExecStop={{ data_path }}/kafka/bin/kafka-server-stop.sh -daemon {{ data_path }}/kafka/config/server.properties
+# 只要不是通过systemctl stop来停止服务，任何情况下都必须要重启服务，默认值为no
+Restart=always
+# 重启间隔，比如某次异常后，等待5(s)再进行启动，默认值0.1(s)
+RestartSec=10
+# StartLimitInterval: 无限次重启，默认是10秒内如果重启超过5次则不再重启，设置为0表示不限次数重启
+StartLimitInterval=0
+LimitNOFILE=265535
+
+[Install]
+WantedBy=multi-user.target

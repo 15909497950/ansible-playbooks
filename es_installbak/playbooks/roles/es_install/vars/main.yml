@@ -1,0 +1,49 @@
+---
+
+# es系统账号
+es_user: app
+# es系统账号密码
+es_sys_pass: "7ujm<KI*"
+# es内部用户统一密码，包括：elastic, apm_system, kibana, logstash_system, beats_system, remote_monitoring_user
+es_user_pass: "7ujm<KI*"
+# es JVM内存设置，安装主机内存大小的一半，不超过32G
+es_jvm: "4g"
+# es版本
+es_version: 6.8.2
+# es部署的数据根目录
+data_path: /data/es
+# es安装目录
+es_worker_path: '{{ data_path }}/elasticsearch-{{ es_version }}'
+# es数据目录，包括：data, logs, shell
+es_data_path: '{{ data_path }}'
+# es物料临时存放目录
+es_tmp_path: '{{ data_path }}/soft'
+# es物料在本机的存放目录
+es_soft_path: '/data/soft/solar_base_install/solar_base_component/es'
+
+# es集群名称
+cluster_name: es_cluster
+# jdk安装目录
+jdk_path: "/usr/local"
+# jdk软件名称
+jdk_package_name: jdk-8u202-linux-x64.tar.gz
+# java文件检测路径
+java_file: "{{ jdk_path }}/jdk1.8.0_202/bin/java"
+# es软件名称
+es_package_name: "elasticsearch-{{ es_version }}.tar.gz"
+# es配置文件路径
+es_config: "{{ es_worker_path }}/config/elasticsearch.yml"
+# es JVM文件路径
+es_jvm_config: "{{ es_worker_path }}/config/jvm.options"
+
+# 自定义CA证书名称
+es_ca_p12: es-ca.p12
+# 自定义CA证书密钥
+es_ca_pass: Es_CA_pass
+# 自定义cert证书名称
+es_cert_p12: es-cert.p12
+# 自定义cert证书密钥
+es_cert_pass: Es_cert_pass
+
+prometheus_exporter_package_name: "prometheus-exporter-{{ es_version }}.0.zip"
+ik_name: "elasticsearch-analysis-ik-{{ es_version }}.zip"

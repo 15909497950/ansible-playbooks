@@ -1,0 +1,15 @@
+---
+# 分发软件包
+
+- name: cp soft
+  copy: src={{ gfs_tmp_path }}/{{ soft_name }} dest={{ data_path }}
+  tags: cp soft
+- name: cp script
+  template: src={{item}} dest={{ data_path }}/shell/ owner=app group=app mode=0760
+  with_items:
+    - install.sh
+  tags: cp shell script
+- name: exec shell
+  shell: sh {{ data_path }}/shell/install.sh
+
+

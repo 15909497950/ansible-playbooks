@@ -1,0 +1,4 @@
+[rabbitmq_cluster]
+master  node_name=master ansible_user=root ansible_port=22 ansible_host=172.16.4.77
+slave1  node_name=slave1 ansible_user=root ansible_port=22 ansible_host=172.16.4.95
+slave2  node_name=slave2 ansible_user=root ansible_port=22 ansible_host=172.16.4.46

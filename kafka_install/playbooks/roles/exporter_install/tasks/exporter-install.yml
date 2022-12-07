@@ -1,0 +1,52 @@
+---
+# 创建相关目录
+- name: mkdir  dir
+  file: dest={{ item }} state=directory recurse=yes
+  with_items:
+    - '{{ data_path }}'
+    - '{{ data_path }}/kafka_exporter'
+    - '{{ data_path }}/soft'
+    - '{{ data_path }}/shell'
+  tags: mkdir_dir
+#分发软件包到安装节点
+
+- name: cp  kafka_exporter soft
+  copy: src={{ soft_tmp_path }}/{{ exporter_name }} dest={{ data_path }}/soft
+  tags: cp kafka_exporter soft
+
+- name: cp script
+  template: src={{item}} dest={{ data_path }}/shell/ owner=app group=app mode=0777
+  with_items:
+    - install.sh
+  tags: cp shell script
+- name: exec shell
+  shell: sh {{ data_path }}/shell/install.sh
+
+- name: cp service
+  template: src={{item}} dest=/etc/systemd/system/ owner=app group=app mode=0777
+  with_items:
+    - kafka_exporter.service
+  tags: cp service
+  when: inventory_hostname == 'node1'
+- name: cp service
+  template: src={{item}} dest=/etc/systemd/system/ owner=app group=app mode=0777
+  with_items:
+    - node2_kafka_exporter.service
+  tags: cp service
+  when: inventory_hostname == 'node2'
+- name: cp service
+  template: src={{item}} dest=/etc/systemd/system/ owner=app group=app mode=0777
+  with_items:
+    - node3_kafka_exporter.service
+  tags: cp service
+  when: inventory_hostname == 'node3'
+- name: change file name
+  command: mv /etc/systemd/system/node2_kafka_exporter.service /etc/systemd/system/kafka_exporter.service
+  when: inventory_hostname == 'node2'
+- name: change file name
+  command: mv /etc/systemd/system/node3_kafka_exporter.service /etc/systemd/system/kafka_exporter.service 
+  when: inventory_hostname == 'node3'
+- name: start kafka_exporter
+  shell: systemctl daemon-reload && systemctl start kafka_exporter 
+- name: enable kafka_exporter
+  command: systemctl enable kafka_exporter   

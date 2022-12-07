@@ -1,0 +1,83 @@
+---
+# 创建相关目录
+- name: mkdir  dir
+  file: dest={{ item }} state=directory recurse=yes owner=app group=app mode=0744
+  with_items:
+    - '{{ data_path }}'
+    - '{{ data_path }}/data'
+    - '{{ data_path }}/soft'
+    - '{{ data_path }}/shell'
+  tags: mkdir_dir
+#分发软件包到安装节点
+- name: create app user
+  user: name=app shell=/bin/bash
+- name: cp  mongodb soft
+  copy: src={{ soft_tmp_path }}/{{ mongodb_name }} dest={{ data_path }}/soft
+  tags: cp mongodb soft
+
+- name: cp  mongosh soft
+  copy: src={{ soft_tmp_path }}/mongodb-mongosh-1.0.5.el7.x86_64.rpm  dest={{ data_path }}/soft
+  tags: cp mongosh soft
+
+- name: cp script
+  template: src={{item}} dest={{ data_path }}/shell/ owner=app group=app mode=0644
+  with_items:
+    - stop.sh
+    - mongoinstall.sh
+    - start.sh
+    - init.sh
+    - account.js
+    - account.sh
+  tags: cp shell script
+
+- name: exec install
+  shell: sh {{ data_path }}/shell/mongoinstall.sh
+
+
+- name: evn set
+  shell: source /etc/profile
+- name: chown app
+  command: chown -R app.app {{ data_path }}/ 
+
+- name: cp mongodb conf
+  template: src=mongodb.conf dest={{ data_path }}/etc/ owner=app group=app mode=0644
+- name: update mongodb conf
+  command: sed -i "s/bind_ip={{ hostvars['master']['ansible_host'] }}/bind_ip={{ hostvars['slave1']['ansible_host'] }}/g" {{ data_path }}/etc/mongodb.conf
+  when: inventory_hostname == 'slave1'
+- name: update mongodb conf
+  command: sed -i "s/bind_ip={{ hostvars['master']['ansible_host'] }}/bind_ip={{ hostvars['slave2']['ansible_host'] }}/g" {{ data_path }}/etc/mongodb.conf
+  when: inventory_hostname == 'slave2'
+
+- name: start mongodb
+  shell: sh {{ data_path }}/shell/start.sh
+  tags: start mongodb 
+- name: initialize mongodb replica  cluster
+  shell: sh {{ data_path }}/shell/init.sh
+  when: inventory_hostname == 'master'
+
+
+
+- name: fetch master keyFile
+  fetch: src={{ data_path }}/etc/keyfile dest=/root/
+  when: inventory_hostname == 'master'
+
+- name: cp master keyFile
+  copy: src=/root/master/{{ data_path }}/etc/keyfile dest={{ data_path }}/etc/ owner=app group=app mode=0600
+- name: Create initialization account
+  shell: sh {{ data_path }}/shell/account.sh
+  when: inventory_hostname == 'master'
+  ignore_errors: True
+
+- name: Turn on authentication
+  command: "{{item}}"
+  with_items:
+    - sed -i "s/#auth=true/auth=true/g" {{ data_path }}/etc/mongodb.conf
+    - sed -i "s/^#keyFile=/keyFile=/g" {{ data_path }}/etc/mongodb.conf
+- name:  stop mongodb
+  shell: sh {{ data_path }}/shell/stop.sh
+  ignore_errors: True
+- name: start mongodb
+  shell: sh {{ data_path }}/shell/start.sh
+  tags: start mongodb
+  ignore_errors: True
+  

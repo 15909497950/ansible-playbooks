@@ -1,0 +1,26 @@
+---
+# 创建相关目录
+- name: mkdir nginx dir
+  file: dest={{ item }} state=directory recurse=yes owner=root group=root mode=0660
+  with_items:
+    - '{{ data_path }}'
+    - '{{ data_path }}/shell'
+  tags: mkdir_nginx_dir
+
+- name: cp soft
+  copy: src={{ nginx_tmp_path }}/{{ soft_name }} dest={{ data_path }}
+  tags: cp soft
+- name: cp script
+  template: src={{item}} dest={{ data_path }}/shell/ owner=root group=root mode=0660
+  with_items:
+    - install.sh
+  tags: cp shell script
+- name: exec shell
+  shell: sh {{ data_path }}/shell/install.sh >/dev/null 2>&1
+  ignore_errors: True
+- name: start nginx
+  command: systemctl start nginx.service
+
+
+
+

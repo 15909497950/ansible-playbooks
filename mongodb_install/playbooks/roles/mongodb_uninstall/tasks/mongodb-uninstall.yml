@@ -1,0 +1,19 @@
+---
+
+# 停止服务
+- name: stop mongodb
+  shell: sh {{ data_path }}/shell/stop.sh
+  ignore_errors: True   
+# 删除相关数据
+- name: delete data
+  file: dest={{ item }} state=absent
+  with_items:
+    # 安装目录
+    - '{{ data_path }}'
+  tags: delete_data
+
+- name: delete profile
+  shell: sed -i '/\/data\/mongodb\/bin/d' /etc/profile
+  ignore_errors: True
+
+

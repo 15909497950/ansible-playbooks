@@ -1,0 +1,10 @@
+---
+
+# 服务卸载
+- name: uninstall 
+  hosts: kafka_cluster
+  remote_user: root
+  gather_facts: false
+  vars_files: roles/exporter_install/vars/main.yml
+  roles:
+    - exporter_uninstall

@@ -1,0 +1,11 @@
+---
+
+# 安装glusterfs服务
+- name: gfs install
+  hosts: gfs_cluster
+  become: yes
+  become_method: sudo
+  remote_user: root
+  gather_facts: false
+  roles:
+    - gfs_install

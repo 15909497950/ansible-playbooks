@@ -1,0 +1,28 @@
+---
+
+# 拷贝创建p12证书的脚本
+- name: copy script
+  template: src={{ item }} dest={{ es_worker_path }}/config/ owner={{ es_user }} group={{ es_user }} mode=0755
+  with_items:
+    - create_es_ca_p12.sh
+    - create_es_cert_p12.sh
+  when: inventory_hostname == 'es1'
+  tags: 
+    - cp_script
+    - run_create_p12_sh
+
+# 执行创建p12 ca证书的脚本
+- name: run create p12 script
+  shell: su - {{ es_user }} -c 'cd {{ es_worker_path }}/config/ && ./create_es_ca_p12.sh'
+  when: inventory_hostname == 'es1'
+  register: es_ca_out
+  changed_when: es_ca_out.stdout != "no-change"
+  tags: run_create_p12_sh
+
+# 执行创建p12 cert证书的脚本
+- name: run create p12 script
+  shell: su - {{ es_user }} -c 'cd {{ es_worker_path }}/config/ && ./create_es_cert_p12.sh'
+  when: inventory_hostname == 'es1'
+  register: es_cert_out
+  changed_when: es_cert_out.stdout != "no-change"
+  tags: run_create_p12_sh

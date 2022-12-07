@@ -1,0 +1,9 @@
+---
+
+# 安装nginx服务
+- name: nginx install
+  hosts: nginx
+  remote_user: root
+  gather_facts: false
+  roles:
+    - nginx_install

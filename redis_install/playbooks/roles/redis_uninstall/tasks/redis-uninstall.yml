@@ -1,0 +1,19 @@
+---
+
+# 停止redis服务
+- name: stop redis
+  shell: pkill redis
+  ignore_errors: True 
+# 删除redis相关数据
+- name: delete redis data
+  file: dest={{ item }} state=absent
+  with_items:
+    # redis.sh
+    - '/etc/profile.d/redis.sh'
+    # redis安装目录
+    - '{{ data_path }}'
+  tags: delete_redis_data
+
+
+
+

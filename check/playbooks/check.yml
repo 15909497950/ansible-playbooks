@@ -1,0 +1,9 @@
+---
+
+# 安装服务
+- name: check user 
+  hosts: ALL
+  remote_user: root
+  gather_facts: false
+  roles:
+    - check

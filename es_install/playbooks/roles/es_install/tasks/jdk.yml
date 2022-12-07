@@ -1,0 +1,22 @@
+---
+
+- name: mkdir dir
+  file: dest={{ item }} state=directory recurse=yes
+  with_items:
+    - '{{ es_tmp_path }}'
+  tags: mkdir_tmp_dir
+
+- name: copy jdk software
+  copy: src={{ es_soft_path }}/{{ jdk_package_name }} dest={{ es_tmp_path }}
+
+- name: uncompression jdk software
+  unarchive: src={{ es_tmp_path }}/{{ jdk_package_name }} dest={{ jdk_path }} creates={{ java_file }} copy=no
+  tags: uncompression_jdk_soft
+
+- name: copy jdk env
+  template: src=java.sh dest={{ es_data_path }}/shell/ mode=0644
+  tags: cp_jdk_env
+
+- name: enforce env
+  shell: sh {{ es_data_path }}/shell/java.sh
+  changed_when: False

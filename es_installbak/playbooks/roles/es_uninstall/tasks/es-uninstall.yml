@@ -1,0 +1,29 @@
+---
+
+# 停止es服务
+- name: stop es
+  systemd: name=elasticsearch state=stopped enabled=no
+
+# 删除es相关数据
+- name: delete es data
+  file: dest={{ item }} state=absent
+  with_items:
+    # es安装目录
+    - '{{ es_worker_path }}'
+    # es物料临时存放目录
+    - '{{ data_path }}'
+  tags: del_es_data
+
+# 删除es系统环境参数
+- name: delete es from limits.conf
+  lineinfile: path=/etc/security/limits.conf regexp={{ es_user }} state=absent
+
+
+
+# 删除es定时任务
+- name: delete es cron
+  cron: name={{ item }} state=absent
+  with_items:
+    - es check
+    - es cleanlog
+  tags: del_es_crontab

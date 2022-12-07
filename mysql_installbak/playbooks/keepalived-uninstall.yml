@@ -1,0 +1,12 @@
+---
+
+# 服务卸载
+- name: uninstall 
+  hosts: mysql
+  become: yes
+  become_method: sudo
+  remote_user: app
+  gather_facts: false
+  vars_files: roles/keepalived_install/vars/main.yml
+  roles:
+    - keepalived_uninstall

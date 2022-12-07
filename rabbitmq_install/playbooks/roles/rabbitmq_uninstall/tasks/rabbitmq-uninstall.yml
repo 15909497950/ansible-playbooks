@@ -1,0 +1,21 @@
+---
+
+# 停止服务
+- name: stop mq
+  shell: sh {{ data_path }}/shell/mqstop.sh
+  ignore_errors: True
+- name: stop erl
+  shell: sh {{ data_path }}/shell/erlstop.sh
+  ignore_errors: True   
+# 删除相关数据
+- name: delete data
+  file: dest={{ item }} state=absent
+  with_items:
+    # 安装目录
+    - '{{ data_path }}'
+    - '/usr/local/erlang'
+  tags: delete_data
+- name: delete profile
+  shell: sed -i '/\/usr\/local\/erlang\/bin/d' /etc/profile && sed -i '/\/data\/rabbitmq\/sbin/d' /etc/profile
+  
+

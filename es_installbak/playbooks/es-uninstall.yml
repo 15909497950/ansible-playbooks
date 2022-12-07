@@ -1,0 +1,10 @@
+---
+
+# 卸载es服务
+- name: es uninstall
+  hosts: es_cluster
+  remote_user: root
+  gather_facts: false
+  vars_files: roles/es_install/vars/main.yml
+  roles:
+    - es_uninstall

@@ -1,0 +1,79 @@
+---
+# 创建相关目录
+- name: mkdir  dir
+  file: dest={{ item }} state=directory recurse=yes owner=app group=app mode=0744
+  with_items:
+    - '{{ data_path }}'
+    - '{{ data_path }}/data'
+    - '{{ data_path }}/soft'
+    - '{{ data_path }}/shell'
+  tags: mkdir_dir
+#分发软件包到安装节点
+- name: add app user
+  user: name=app shell=/bin/bash
+- name: cp  mysql soft
+  copy: src={{ soft_tmp_path }}/{{ mysql_name }} dest={{ data_path }}/soft
+  tags: cp mysql soft
+
+- name: cp script
+  template: src={{item}} dest={{ data_path }}/shell/ owner=app group=app mode=0744
+  with_items:
+    - stop.sh
+    - mysqlinstall.sh
+    - start.sh
+    - slave.sh
+    - master.sh
+    - changeslave.sh
+    - changemaster.sh
+  tags: cp shell script
+- name: env set
+  shell: echo "export PATH=${PATH}:{{ data_path }}/bin" >> /etc/profile
+- name: exec shell
+  shell: sh {{ data_path }}/shell/mysqlinstall.sh
+
+
+ 
+- name: chown mysql
+  command: chown -R app.app {{ data_path }} 
+- name: delete my.cnf
+  shell: rm -rf /etc/my.cnf
+- name: cp my.cnf
+  template: src=my.cnf dest=/etc/ owner=app group=app mode=0644
+- name: update my.cnf
+  command: sed -i "s/server-id=1/server-id=2/g" /etc/my.cnf
+  when: inventory_hostname == 'slave'
+- name: update my.cnf
+  command: sed -i "s/auto-increment-offset = 1/auto-increment-offset = 2/g" /etc/my.cnf
+  when: inventory_hostname == 'slave'
+
+
+- name: init mysql and start mysql
+  shell: sh {{ data_path }}/shell/start.sh
+  tags: start mysql
+  ignore_errors: True 
+- name: exec slave.sh
+  shell: sh {{ data_path }}/shell/slave.sh
+  when: inventory_hostname == 'slave'
+- name: exec master.sh
+  shell: sh {{ data_path }}/shell/master.sh
+  when: inventory_hostname == 'master'
+- name: fetch master status
+  fetch: src={{ data_path }}/master dest=/tmp/ flat=yes owner=app group=app mode=0644
+  when: inventory_hostname == 'master'
+- name: cp master status
+  copy: src=/tmp/master dest={{ data_path }}/master owner=app group=app mode=0644
+  when: inventory_hostname == 'slave'
+- name: fetch slave status
+  fetch: src={{ data_path }}/slave dest=/tmp/ flat=yes owner=app group=app mode=0644
+  when: inventory_hostname == 'slave'
+- name: cp slave status
+  copy: src=/tmp/slave dest={{ data_path }}/slave owner=app group=app mode=0644
+  when: inventory_hostname == 'master'  
+- name: change slave
+  shell: sh {{ data_path }}/shell/changeslave.sh
+  when: inventory_hostname == 'slave'
+
+
+- name: change master
+  shell: sh {{ data_path }}/shell/changemaster.sh
+  when: inventory_hostname == 'master'

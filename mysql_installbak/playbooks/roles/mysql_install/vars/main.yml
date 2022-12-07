@@ -1,0 +1,15 @@
+---
+
+### 以下配置根据实际情况进行修改 ###
+
+
+# 部署的数据根目录
+data_path: /data/mysql
+# 物料在部署机的存放目录
+soft_tmp_path: /data/soft/solar_base_install/solar_base_component/mysql
+# 物料包名称
+mysql_name: mysql-5.7.32-linux-glibc2.12-x86_64.tar.gz
+#mysql root 密码
+passwd: '7ujm<KI*'
+#mysql app用户密码
+app_passwd: 'MBGGr7KK4m_HF_Fw@!99'

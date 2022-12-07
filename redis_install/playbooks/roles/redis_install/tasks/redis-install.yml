@@ -1,0 +1,69 @@
+---
+# 创建redis相关目录
+- name: mkdir redis dir
+  file: dest={{ item }} state=directory recurse=yes owner=app group=app mode=0755
+  with_items: 
+    - '{{ data_path }}'
+    - '{{ data_path }}/data'
+    - '{{ data_path }}/logs'
+    - '{{ data_path }}/etc'
+    - '{{ data_path }}/pid'
+    - '{{ data_path }}/shell'
+    - '{{ data_path }}/soft'
+  tags: mkdir_redis_dir
+
+- name: cp soft
+  copy: src={{ redis_tmp_path }}/{{ soft_name }} dest={{ data_path }}/soft
+  tags: cp soft
+- name: cp script
+  template: src={{item}} dest={{ data_path }}/shell/ owner=app group=app mode=0755
+  with_items:
+    - redis.sh
+    - createuser-dev-app.sh
+  tags: cp shell script
+- name: add app and devops user
+  shell: sh {{ data_path }}/shell/createuser-dev-app.sh
+  ignore_errors: True
+- name: exec shell
+  shell: sh {{ data_path }}/shell/redis.sh
+- name: set sysctl
+  sysctl:
+    name: vm.overcommit_memory
+    value: 1
+    sysctl_set: yes
+    reload: yes
+- name: set sysctl
+  sysctl:
+    name: net.core.somaxconn
+    value: 551
+    sysctl_set: yes
+    reload: yes  
+# 分发redis配置文件
+- name: update redis config
+  template: src={{item}} dest={{ data_path }}/etc/ owner=app group=app mode=0666
+  with_items:
+    - redis.conf
+    - sentinel.conf
+  when: inventory_hostname == 'slave1'  
+  tags: update_redis_config
+- name: update redis config
+  template: src={{item}} dest={{ data_path }}/etc/ owner=app group=app mode=0666
+  with_items:
+    - redis.conf
+    - sentinel.conf
+  when: inventory_hostname == 'slave2'  
+  tags: update_config  
+- name: update redis config
+  template: src={{item}} dest={{ data_path }}/etc owner=app group=app mode=0755
+  with_items:
+    - redis_master.conf
+    - sentinel.conf
+  when: inventory_hostname == 'master'  
+  tags: update_redis_config
+- name: change name
+  command: mv {{ data_path }}/etc/redis_master.conf {{ data_path }}/etc/redis.conf
+  when: inventory_hostname == 'master'
+- name: start redis server
+  shell: su - app -c "{{ data_path }}/bin/redis-server {{ data_path }}/etc/redis.conf"
+- name: start redis sentinel
+  shell: su - app -c "{{ data_path }}/bin/redis-sentinel {{ data_path }}/etc/sentinel.conf"

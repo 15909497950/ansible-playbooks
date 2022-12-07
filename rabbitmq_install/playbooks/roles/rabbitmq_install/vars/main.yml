@@ -1,0 +1,23 @@
+---
+
+### 以下配置根据实际情况进行修改 ###
+
+
+# 部署的数据根目录
+data_path: /data/rabbitmq
+# 物料在部署机的存放目录
+soft_tmp_path: /data/soft/solar_base_install/solar_base_component/rabbitmq
+# 物料包名称
+otp_name: otp_src_21.1.tar.gz
+mq_name: rabbitmq-server-generic-unix-3.7.8.tar.xz
+jdk_name: jdk-8u202-linux-x64.tar.gz
+#延迟插件
+plugin_name: rabbitmq_delayed_message_exchange-3.8.0.ez
+#admin账号密码
+passwd: '7ujm<KI*'
+#兔展账号密码
+tzuser: rabbit
+tzpasswd: rabbit
+#琢学账号密码
+zxuser: cosp
+zxpasswd: cosp

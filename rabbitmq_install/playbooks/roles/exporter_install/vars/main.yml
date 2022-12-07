@@ -1,0 +1,13 @@
+---
+
+### 以下配置根据实际情况进行修改 ###
+
+
+# 部署的数据根目录
+data_path: /data/rabbitmq
+# 物料在部署机的存放目录
+soft_tmp_path: /data/solar_base_commpent/rabbitmq
+# 物料包名称
+version: 0.25.2
+exporter_name: rabbitmq_exporter-{{ version }}.linux-amd64.tar.gz
+port: 9090

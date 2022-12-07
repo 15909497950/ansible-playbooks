@@ -1,0 +1,11 @@
+---
+
+# 安装服务
+- name: rabbitmq install
+  hosts: rabbitmq_cluster
+  become: yes
+  become_method: sudo
+  remote_user: root
+  gather_facts: false
+  roles:
+    - rabbitmq_install

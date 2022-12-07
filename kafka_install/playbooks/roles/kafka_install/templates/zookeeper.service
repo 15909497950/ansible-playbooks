@@ -1,0 +1,24 @@
+[Unit]
+Description=zookeeper.service
+After=network.target
+
+[Service]
+Type=forking
+User=app
+Group=app
+# 第一行设置日志目录，如果没有设置，默认是当前目录，对有的用户来说，可能没有权限。
+Environment=ZOO_LOG_DIR={{ data_path }}/zookeeper/logs
+# 第二行是配置环境变量，systemd用户实例不会继承类似.bashrc中定义的环境变量，所以是找不到jdk目录的，而zookeeper又必须有。
+Environment=PATH={{ data_path }}/jdk1.8.0_202/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/usr/local/jdk/bin:/usr/local/jdk/bin:/usr/local/jdk/bin:/root/bin
+ExecStart={{ data_path }}/zookeeper/bin/zkServer.sh start
+ExecStop={{ data_path }}/zookeeper/bin/zkServer.sh stop
+ExecReload={{ data_path }}/zookeeper/bin/zkServer.sh restart
+PIDFile={{ data_path }}/zookeeper/data/zookeeper_server.pid
+# 只要不是通过systemctl stop来停止服务，任何情况下都必须要重启服务，默认值为no
+Restart=always
+# 重启间隔，比如某次异常后，等待5(s)再进行启动，默认值0.1(s)
+RestartSec=10
+# StartLimitInterval: 无限次重启，默认是10秒内如果重启超过5次则不再重启，设置为0表示不限次数重启
+StartLimitInterval=0
+[Install]
+WantedBy=multi-user.target

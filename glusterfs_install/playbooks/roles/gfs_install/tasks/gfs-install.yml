@@ -1,0 +1,49 @@
+---
+
+# 创建相关目录
+- name: mkdir gfs dir
+  file: dest={{ item }} state=directory recurse=yes owner=app group=app mode=0755
+  with_items:
+    - '{{ data_path }}'
+  tags: mkdir_gfs_dir
+- name: mkdir gfs dir
+  file: dest={{ item }} state=directory recurse=yes owner=app group=app mode=0755
+  with_items:
+    - '{{ volume_path }}'
+  tags: mkdir_gfs_dir
+- name: cp soft
+  copy: src={{ gfs_tmp_path }}/{{ soft_name }} dest={{ data_path }}
+  tags: cp soft
+- name: cp script
+  template: src={{item}} dest={{ data_path }}/ owner=app group=app mode=0755
+  with_items:
+    - gfsinstall.sh
+    - volume.sh
+  tags: cp shell script
+- name: exec gsinstall sh
+  shell: sh {{ data_path }}/gfsinstall.sh
+
+
+- name: probe
+  command: gluster peer probe {{ hostvars['gfs02']['ansible_host'] }}
+  when: inventory_hostname == 'gfs01'
+- name: probe
+  command: gluster peer probe {{ hostvars['gfs03']['ansible_host'] }}
+  when: inventory_hostname == 'gfs01'
+- name: probe
+  command: gluster peer probe {{ hostvars['gfs04']['ansible_host'] }}
+  when: inventory_hostname == 'gfs01'
+#配置 volume,创建GlusterFS磁盘
+- name: create solar-volume
+  command: gluster volume create solar-volume replica 2 {{ hostvars['gfs01']['ansible_host'] }}:{{ volume_path }}  {{ hostvars['gfs02']['ansible_host'] }}:{{ volume_path }} {{ hostvars['gfs03']['ansible_host'] }}:{{ volume_path }} {{ hostvars['gfs04']['ansible_host'] }}:{{ volume_path }} force 
+  when: inventory_hostname == 'gfs01'
+  ignore_errors: True 
+- name: start solar-volume
+  command: gluster volume start solar-volume force
+  when: inventory_hostname == 'gfs01'
+  ignore_errors: True
+#Glusterfs调优
+- name: exec volume
+  shell: sh {{ data_path }}/volume.sh
+  when: inventory_hostname == 'gfs01'
+

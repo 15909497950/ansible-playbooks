@@ -1,0 +1,21 @@
+---
+
+# 停止服务
+- name: stop keepalived
+  shell: systemctl stop keepalived.service
+  ignore_errors: True   
+# 删除相关数据
+- name: delete data
+  file: dest={{ item }} state=absent
+  with_items:
+    # 安装目录
+    - '{{ data_path }}'
+    # soft
+    - '{{ data_path }}/soft/{{ keepalived_name }}'
+    - '/etc/rc.d/init.d/keepalived'
+  tags: delete_data
+- name: delete data
+  file: dest=/etc/keepalived state=absent
+
+
+

@@ -1,0 +1,5 @@
+[kafka_cluster]
+# kafka集群
+node1  ansible_user=root ansible_port=22 ansible_host=172.16.4.77
+node2  ansible_user=root ansible_port=22 ansible_host=172.16.4.95
+node3  ansible_user=root ansible_port=22 ansible_host=172.16.4.46

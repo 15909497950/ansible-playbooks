@@ -1,0 +1,7 @@
+[node_exporter]
+node1  node_name=node1 ansible_user=root ansible_port=22 ansible_host=172.16.4.232 ansible_ssh_pass='xY0TfBEyYLi0eqY3XF+XzOMO8zn+'
+node2  node_name=node2 ansible_user=root ansible_port=22 ansible_host=172.16.4.240 ansible_ssh_pass='xY0TfBEyYLi0eqY3XF+XzOMO8zn+'
+node3  node_name=node3 ansible_user=root ansible_port=22 ansible_host=172.16.4.251 ansible_ssh_pass='xY0TfBEyYLi0eqY3XF+XzOMO8zn+'
+node4  node_name=node4 ansible_user=root ansible_port=22 ansible_host=172.16.4.198 ansible_ssh_pass='xY0TfBEyYLi0eqY3XF+XzOMO8zn+'
+node5  node_name=node5 ansible_user=root ansible_port=22 ansible_host=172.16.4.123 ansible_ssh_pass='xY0TfBEyYLi0eqY3XF+XzOMO8zn+'
+node6  node_name=node6 ansible_user=root ansible_port=22 ansible_host=172.16.4.210 ansible_ssh_pass='xY0TfBEyYLi0eqY3XF+XzOMO8zn+'

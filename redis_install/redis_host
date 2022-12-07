@@ -1,0 +1,5 @@
+[redis_cluster]
+# redis哨兵集群
+master  ansible_user=root ansible_port=22 ansible_host=172.16.4.77
+slave1  ansible_user=root ansible_port=22 ansible_host=172.16.4.95
+slave2  ansible_user=root ansible_port=22 ansible_host=172.16.4.46

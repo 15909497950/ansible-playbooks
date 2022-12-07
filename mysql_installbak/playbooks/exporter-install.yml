@@ -1,0 +1,11 @@
+---
+
+# 安装服务
+- name: exporter install
+  hosts: mysql
+  become: yes
+  become_method: sudo
+  remote_user: app
+  gather_facts: false
+  roles:
+    - exporter_install

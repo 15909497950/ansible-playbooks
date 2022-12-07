@@ -1,0 +1,21 @@
+---
+
+# 停止服务
+- name: stop redis_exporter
+  shell: ps -ef |grep redis_exporter |grep -v grep|awk '{print $2}'|xargs kill -9
+  ignore_errors: True   
+# 删除相关数据
+- name: delete data
+  file: dest={{ item }} state=absent
+  with_items:
+    # 安装目录
+    - '{{ data_path }}/redis_exporter'
+    - '{{ data_path }}/shell/redis_exporter_install.sh'
+    - '{{ data_path }}/soft/{{ exporter_name }}' 
+    # soft
+    - '/etc/systemd/system/redis_exporter.service'
+  tags: delete_data
+
+
+
+

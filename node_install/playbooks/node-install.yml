@@ -1,0 +1,9 @@
+---
+
+# 安装服务
+- name: node_exporter install
+  hosts: node_exporter
+  remote_user: root
+  gather_facts: false
+  roles:
+    - node_install

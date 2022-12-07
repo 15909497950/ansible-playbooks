@@ -1,0 +1,12 @@
+---
+
+### 以下配置根据实际情况进行修改 ###
+
+
+# 部署的数据根目录
+data_path: /data/
+#app用户密码
+passwd: '7ujm<KI*'
+#devops用户密码
+dev_passwd: '7ujm<KI*'
+

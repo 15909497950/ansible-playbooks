@@ -1,0 +1,4 @@
+---
+
+- name: restart es
+  systemd: name=elasticsearch state=restarted

@@ -1,0 +1,10 @@
+---
+
+# 服务卸载
+- name: nginx uninstall
+  hosts: nginx
+  remote_user: root
+  gather_facts: false
+  vars_files: roles/nginx_install/vars/main.yml
+  roles:
+    - nginx_uninstall

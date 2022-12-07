@@ -1,0 +1,12 @@
+---
+
+# 服务卸载
+- name: kafka uninstall
+  hosts: kafka_cluster
+  become: yes
+  become_method: sudo
+  remote_user: root
+  gather_facts: false
+  vars_files: roles/kafka_install/vars/main.yml
+  roles:
+    - kafka_uninstall

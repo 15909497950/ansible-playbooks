@@ -1,0 +1,62 @@
+---
+# 创建相关目录
+- name: mkdir kafka dir
+  file: dest={{ item }} state=directory recurse=yes owner=app group=app mode=0766
+  with_items:
+    - '{{ data_path }}/zookeeper'
+    - '{{ data_path }}/zookeeper/data'
+    - '{{ data_path }}/kafka'
+    - '{{ data_path }}/kafka/soft'
+    - '{{ data_path }}/kafka/shell'
+  tags: mkdir_dir
+#分发软件包到安装节点
+- name: cp kafka soft
+  copy: src={{ soft_tmp_path }}/{{ kafka_name }} dest={{ data_path }}/kafka/soft
+  tags: cp kafka soft
+- name: cp zk soft
+  copy: src={{ soft_tmp_path }}/{{ zk_name }} dest={{ data_path }}/kafka/soft
+  tags: cp zk soft
+- name: cp jdk soft
+  copy: src={{ soft_tmp_path }}/{{ jdk_name }} dest={{ data_path }}/kafka/soft
+  tags: cp jdk soft  
+- name: cp script
+  template: src={{item}} dest={{ data_path }}/kafka/shell/ owner=app group=app mode=0767
+  with_items:
+    - zk.sh
+    - kafka.sh
+  tags: cp shell script
+- name: cp service
+  template: src={{item}} dest=/etc/systemd/system/ owner=app group=app mode=0777
+  with_items:
+    - zookeeper.service
+    - kafka.service
+  tags: cp service
+- name: exec zk shell
+  shell: sh {{ data_path }}/kafka/shell/zk.sh
+- name: create a file            
+  file: path={{ data_path }}/zookeeper/data/myid state=touch mode=0755 owner=app group=app
+- name: add a line
+  lineinfile: path={{ data_path }}/zookeeper/data/myid line='1'
+  when: inventory_hostname == 'node1'
+- name: add a line
+  lineinfile: path={{ data_path }}/zookeeper/data/myid line='2'
+  when: inventory_hostname == 'node2'
+- name: add a line
+  lineinfile: path={{ data_path }}/zookeeper/data/myid line='3'
+  when: inventory_hostname == 'node3'
+ 
+- name: start zookeeper
+  shell: systemctl daemon-reload && systemctl start zookeeper.service
+- name: exec kafka shell
+  shell: sh {{ data_path }}/kafka/shell/kafka.sh
+- name: update kafka config
+  lineinfile: path=/data/kafka/config/server.properties regexp="broker.id=0" line="broker.id=1"
+  when: inventory_hostname == 'node1'
+- name: update kafka config
+  lineinfile: path=/data/kafka/config/server.properties regexp="broker.id=0" line="broker.id=2"
+  when: inventory_hostname == 'node2'
+- name: update kafka config
+  lineinfile: path=/data/kafka/config/server.properties regexp="broker.id=0" line="broker.id=3"
+  when: inventory_hostname == 'node3'  
+- name: start kafka
+  shell: systemctl daemon-reload && systemctl start kafka.service

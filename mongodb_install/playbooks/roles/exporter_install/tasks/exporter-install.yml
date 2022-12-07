@@ -1,0 +1,24 @@
+---
+# 创建相关目录
+- name: mkdir  dir
+  file: dest={{ item }} state=directory recurse=yes
+  with_items:
+    - '{{ data_path }}'
+    - '{{ data_path }}/soft'
+    - '{{ data_path }}/shell'
+  tags: mkdir_dir
+#分发软件包到安装节点
+
+- name: cp  mongodb_exporter soft
+  copy: src={{ soft_tmp_path }}/{{ exporter_name }} dest={{ data_path }}/soft
+  tags: cp mongodb_exporter soft
+
+- name: cp script
+  template: src={{item}} dest={{ data_path }}/shell/ owner=root group=root mode=0644
+  with_items:
+    - install.sh
+  tags: cp shell script
+- name: exec shell
+  shell: sh {{ data_path }}/shell/install.sh
+
+  

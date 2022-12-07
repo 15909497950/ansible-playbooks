@@ -1,0 +1,55 @@
+---
+
+# 创建es相关目录
+- name: mkdir es dir
+  file: dest={{ item }} state=directory recurse=yes owner={{es_user}} group={{ es_user }} mode=0760
+  with_items:
+    - '{{ data_path }}'
+    - '{{ es_worker_path }}'
+    - '{{ es_tmp_path }}'
+    - '{{ es_data_path }}/data'
+    - '{{ es_data_path }}/logs'
+    - '{{ es_data_path }}/shell'
+  tags: mkdir_es_dir
+
+# 拷贝es软件
+- name: copy es_file
+  copy: src={{ es_soft_path }}/{{ es_package_name }} dest={{ es_tmp_path }}
+  tags: 
+    - cp_es_file
+    - uncompression_es_file
+
+
+# 解压es
+- name: uncompression es
+  unarchive: src={{ es_tmp_path }}/{{ es_package_name }} dest={{ data_path }} creates={{ es_config }} copy=no
+  tags: uncompression_es_file
+
+# 创建es账号
+- name: create es user
+  user: name={{ es_user }}  shell=/bin/bash
+  tags: create_es_uesr
+
+# 下发es配置文件
+- name: update es config
+  template: src={{item}} dest={{ es_worker_path }}/config/ owner={{es_user}} group={{ es_user }} mode=0660
+  with_items:
+    - jvm.options
+    - elasticsearch.yml
+  tags: update_es_config
+
+# 设置es相关目录权限
+- name: chown es
+  file: dest={{ item }} recurse=yes owner={{ es_user }} group={{ es_user }}
+  with_items:
+    - "{{ es_worker_path }}"
+    - "{{ es_data_path }}"
+  tags: 
+    - chown_es
+    - update_es_config
+
+# 添加es服务脚本
+- name: add es service
+  template: src=elasticsearch.service dest=/etc/systemd/system/elasticsearch.service mode=0755
+  tags: add_es_service
+

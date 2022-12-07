@@ -1,0 +1,17 @@
+---
+
+# 停止nginx服务
+- name: stop nginx
+  shell: systemctl stop nginx.service
+  ignore_errors: True 
+# 删除nginx相关数据
+- name: delete nginx data
+  file: dest={{ item }} state=absent
+  with_items:
+    # nginx soft
+    - '{{ data_path }}'
+  tags: delete_nginx_data
+
+
+
+

@@ -1,0 +1,58 @@
+---
+
+# 从es1上拷贝p12文件到本地
+- name: fetch p12 from es1
+  fetch: src="{{es_worker_path}}/config/{{item}}" dest=/tmp/ flat=yes
+  with_items:
+     - "{{es_ca_p12}}"
+     - "{{es_cert_p12}}"
+  when: inventory_hostname == 'es1'
+  tags: get_p12_to_local
+
+# 同步本地上的p12证书到其他节点
+- name: copy p12 to other es node
+  copy: src=/tmp/{{item}} dest={{es_worker_path}}/config/ owner={{es_user}} group={{es_user}}
+  with_items:
+     - "{{ es_ca_p12 }}"
+     - "{{ es_cert_p12 }}"
+  tags: cp_p12_to_node
+
+- name: start es
+  systemd: name=elasticsearch state=started enabled=true daemon_reload=yes
+
+- name: wait for es start
+  wait_for:
+    host: "{{ansible_host}}"
+    port: 9200
+    timeout: 300
+    delay: 10
+
+# 检查cert证书是否存在
+#- name: check {{ es_cert_p12 }}
+#  stat: path={{ es_worker_path }}/config/{{ es_cert_p12 }}
+#  register: check_cert_p12_result
+#  ignore_errors: yes
+#  tags: 
+#    - check_cert_p12
+#    - add_secure_config
+#    - run_add_secure_key_sh
+
+# 拷贝相关的脚本到es节点
+- name: copy script
+  template: src={{ item }} dest={{ es_worker_path }}/config/ owner={{ es_user }} group={{ es_user }} mode=0755
+  with_items:
+    - setup_passwords.sh
+  when: inventory_hostname == 'es1'
+  tags: 
+    - cp_script
+    - run_setup_passwords_sh
+
+
+# 设置用户名和密码
+- name: setup passwords
+  shell: su - {{ es_user }} -c 'cd {{ es_worker_path }}/config/ && ./setup_passwords.sh'
+  when: inventory_hostname == 'es1'
+  register: es_password_out
+  changed_when: es_password_out.stdout != "no-change"
+  tags:
+    - run_setup_passwords_sh

@@ -1,0 +1,16 @@
+---
+
+### 以下配置根据实际情况进行修改 ###
+
+
+data_path: /data/gfs
+
+# glusterfs数据卷目录（保持默认就行）
+volume_path: /data/gfs_data
+# 物料在部署机的存放目录
+gfs_tmp_path: /data/soft/solar_base_install/solar_base_component/glusterfs
+# 物料包名称
+soft_name: glusterfs-9.2.tar.gz
+
+
+

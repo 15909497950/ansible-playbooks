@@ -1,0 +1,13 @@
+---
+
+### 以下配置根据实际情况进行修改 ###
+
+
+# 部署的数据根目录
+data_path: /data/node_exporter
+# 物料在部署机的存放目录
+soft_tmp_path: /data/soft/node_exporter
+#node_exporter包名
+node_name: node_exporter-0.18.1.linux-amd64.tar.gz
+
+

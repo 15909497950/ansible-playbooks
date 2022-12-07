@@ -1,0 +1,7 @@
+---
+- name: stop redis
+  command: pkill redis
+- name: start redis server
+  command: redis-server {{ data_path }}/etc/redis.conf 
+- name: start redis sentinel
+  command: redis-sentinel {{ data_path }}/etc/sentinel.conf

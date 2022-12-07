@@ -1,0 +1,11 @@
+---
+
+# 安装glusterfs 客户端服务
+- name: gfs_client install
+  hosts: tke-node
+  become: yes
+  become_method: sudo
+  remote_user: root
+  gather_facts: false
+  roles:
+    - gfs_client_install

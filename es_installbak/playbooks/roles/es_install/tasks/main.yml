@@ -1,0 +1,7 @@
+- include: system_es.yml
+- include: jdk.yml
+- include: es-install.yml
+- include: add_secure_p12.yml
+- include: add_secure_config.yml
+- include: promethues_exporter.yml
+- include: es-cron.yml

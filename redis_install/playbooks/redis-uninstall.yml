@@ -1,0 +1,12 @@
+---
+
+# redis服务卸载
+- name: redis uninstall
+  hosts: redis_cluster
+  become: yes
+  become_method: sudo
+  remote_user: root
+  gather_facts: false
+  vars_files: roles/redis_install/vars/main.yml
+  roles:
+    - redis_uninstall

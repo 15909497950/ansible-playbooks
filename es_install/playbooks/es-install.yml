@@ -1,0 +1,11 @@
+---
+
+# 安装es服务
+- name: es install
+  hosts: es_cluster
+  become: yes
+  become_method: sudo
+  remote_user: root
+  gather_facts: false
+  roles:
+    - es_install

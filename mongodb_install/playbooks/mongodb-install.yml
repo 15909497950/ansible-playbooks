@@ -1,0 +1,11 @@
+---
+
+# 安装服务
+- name: mongodb install
+  hosts: mongodb_cluster
+  become: yes
+  become_method: sudo
+  remote_user: root
+  gather_facts: false
+  roles:
+    - mongodb_install

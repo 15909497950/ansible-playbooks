@@ -1,0 +1,20 @@
+---
+
+# 停止服务
+- name: stop mongodb_exporter
+  shell: ps -ef |grep mongodb_exporter |grep -v grep|awk '{print $2}'|xargs kill -9
+  ignore_errors: True   
+# 删除相关数据
+- name: delete data
+  file: dest={{ item }} state=absent
+  with_items:
+    # 安装目录
+    - '{{ data_path }}' 
+    # soft
+    - '{{ data_path }}/soft/{{ exporter_name }}'
+    - '/etc/systemd/system/mongodb_exporter.service'
+  tags: delete_data
+
+
+
+

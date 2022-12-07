@@ -1,0 +1,27 @@
+---
+
+# 停止服务
+- name: stop zk
+  shell: systemctl stop zookeeper.service
+  ignore_errors: True
+- name: stop kafka
+  shell: systemctl stop kafka.service
+  ignore_errors: True   
+# 删除相关数据
+- name: delete data
+  file: dest={{ item }} state=absent
+  with_items:
+    # 安装目录
+    - '{{ data_path }}/kafka'
+    - '{{ data_path }}/zookeeper'
+    # soft
+    - '{{ data_path }}/kafka/soft/{{ zk_name }}'
+    - '{{ data_path }}/kafka/soft/{{ jdk_name }}'
+    - '{{ data_path }}/kafka/soft/{{ kafka_name }}'
+    - '/etc/systemd/system/zookeeper.service'
+    - '/etc/systemd/system/kafka.service'
+  tags: delete_data
+
+
+
+

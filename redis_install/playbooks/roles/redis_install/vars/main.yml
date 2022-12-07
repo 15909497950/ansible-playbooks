@@ -1,0 +1,17 @@
+---
+
+### 以下配置根据实际情况进行修改 ###
+
+# redis加密密码，主从认证密码
+redis_pass: '7ujm<KI*'
+# redis版本
+version: 5.0.9
+# redis部署的数据根目录
+data_path: /data/redis
+# 物料在部署机的存放目录
+redis_tmp_path: /data/soft/solar_base_install/solar_base_component/redis
+# 物料包名称
+soft_name: redis-{{ version }}.tar.gz
+
+
+
